@@ -37,42 +37,48 @@ admin.initializeApp({
 const db = admin.database();
 
 // --- 3. CONFIGURACIÓN MQTT ---
-const ID_USUARIO = process.env.USER_ID || "0648";
-const client = mqtt.connect(process.env.MQTT_BROKER || 'mqtt://broker.hivemq.com');
+const mqtt = require('mqtt');
 
-const getFechaColombia = () => {
-  return new Date().toLocaleString("es-CO", {
-    timeZone: "America/Bogota",
-    hour12: true,
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', second: '2-digit'
-  });
+// 1. Configuración con tus nuevas credenciales de HiveMQ Privado
+const options = {
+  host: '57b7659f151946d6875ff578dc480234.s1.eu.hivemq.cloud',
+  port: 8883,
+  protocol: 'mqtts', // 'mqtts' es obligatorio para el puerto 8883 (TLS)
+  username: 'system-sos',
+  password: 'Pasocananeo15*',
+  reconnectPeriod: 1000 // Intenta reconectar cada segundo si se cae
 };
 
+const client = mqtt.connect(options);
+
 client.on('connect', () => {
-  console.log(`🚀 Conectado a MQTT - Monitoreando ID: ${ID_USUARIO}`);
-  client.subscribe(`sos/${ID_USUARIO}/#`);
+  console.log('✅ Servidor AWS reconectado exitosamente a HiveMQ Privado');
+  
+  // 2. Suscribirse a los nuevos tópicos que definimos para el ESP8266
+  // Usamos el "+" para capturar el ID 0648 y cualquier otro
+  client.subscribe('v1/dispositivos/+/sos');
+  client.subscribe('v1/dispositivos/+/status');
 });
 
 client.on('message', (topic, message) => {
-  const msg = message.toString();
-  const partes = topic.split('/');
-  const tipo = partes[2];
+  const payload = message.toString();
+  const topicParts = topic.split('/');
+  const deviceId = topicParts[2]; // Aquí extrae el "0648"
 
-  if (tipo === 'sos') {
-    db.ref(`alertas_historial/${ID_USUARIO}`).push({
-      evento: "BOTON_PRESIONADO",
-      mensaje: msg,
-      fecha_hora: getFechaColombia(),
-      unix_time: admin.database.ServerValue.TIMESTAMP
-    });
-    console.log("🚨 SOS Recibido y Guardado");
-  } else if (tipo === 'online') {
-    db.ref(`monitoreo_estado/${ID_USUARIO}`).update({
-      status: (msg === "1") ? "En Línea" : "Desconectado",
-      ultima_conexion: getFechaColombia()
-    });
-  }
+  console.log(`📩 Alerta recibida de ${deviceId}: ${payload}`);
+
+  // 3. AQUÍ REUTILIZA TU LÓGICA DE FIREBASE QUE YA TENÍAS
+  // Ejemplo (mantén el código de Firebase que ya te funcionaba):
+  /*
+  db.ref('tu_ruta_de_firebase/' + deviceId).update({
+    mensaje: payload,
+    timestamp: Date.now()
+  });
+  */
+});
+
+client.on('error', (err) => {
+  console.error('❌ Error de conexión MQTT en AWS:', err);
 });
 
 // --- 4. ESCUCHA DE COMANDOS ---
