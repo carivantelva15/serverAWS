@@ -1,17 +1,15 @@
 {
-  "name": "sos-system-bridge",
-  "version": "3.0.0",
-  "description": "Puente MQTT a Firebase para sistema SOS",
-  "main": "server.js",
+  "name": "sos-server",
+  "version": "1.0.0",
+  "description": "Servidor SOS para AWS EC2",
+  "main": "index.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node index.js"
   },
   "dependencies": {
-    "mqtt": "^5.0.0",
-    "firebase-admin": "^11.11.0",
-    "express": "^4.18.2"
-  },
-  "engines": {
-    "node": ">=16.0.0"
+    "dotenv": "^16.4.5",
+    "express": "^4.18.3",
+    "firebase-admin": "^12.0.0",
+    "mqtt": "^5.5.0"
   }
 }
