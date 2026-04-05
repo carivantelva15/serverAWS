@@ -10,7 +10,7 @@ const serviceAccount = require('./serviceAccountKey.json');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://tu-proyecto-sos.firebaseio.com" // 👈 CAMBIA POR TU URL DE FIREBASE
+  databaseURL: "https://sos-system-5fc8a-default-rtdb.firebaseio.com/" // 👈 CAMBIA POR TU URL DE FIREBASE
 });
 
 const db = admin.database();
